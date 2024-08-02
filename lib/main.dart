@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         MyRoutes.loginRoute: (context) => const LoginPage(),
       },
+      debugShowCheckedModeBanner: false, // This removes the debug banner
     );
   }
 }

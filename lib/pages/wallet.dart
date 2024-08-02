@@ -70,7 +70,10 @@ class _WalletPageState extends State<WalletPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alphachain Wallet'),
+        leading: Icon(Icons.settings),
+        centerTitle: true,
+          actions: [IconButton(onPressed: (){}, icon:Icon(Icons.logout))],
+        title: const Text('Alphachain Wllet'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +82,7 @@ class _WalletPageState extends State<WalletPage> {
             height: MediaQuery.of(context).size.height * 0.4,
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Text(
                   'Wallet Address',

@@ -36,6 +36,7 @@ class _ImportWalletState extends State<ImportWallet> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Icon(Icons.logout),
         title: const Text('Import from Seed'),
       ),
       body: Padding(
@@ -46,7 +47,7 @@ class _ImportWalletState extends State<ImportWallet> {
           children: [
             const Text(
               'Please Enter your mnemonic phrase:',
-              style: TextStyle(fontSize: 18.0),
+              style: TextStyle(fontSize: 18.0,),
             ),
             const SizedBox(height: 24.0),
             TextField(
