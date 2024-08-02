@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web3_wallet/providers/wallet_provider.dart';
 import 'package:web3_wallet/pages/wallet.dart';
+import 'package:bip39/bip39.dart' as bip39;
+
 
 class VerifyMnemonicPage extends StatefulWidget {
   final String mnemonic;
@@ -18,6 +20,15 @@ class _VerifyMnemonicPageState extends State<VerifyMnemonicPage> {
   String verificationText = '';
 
   void verifyMnemonic() {
+    
+    // Example mnemonic phrase
+    final mnemonic = "action glow era all liquid critic achieve lawsuit era anger loud slight";
+
+    // Verify the mnemonic
+    final isValid = bip39.validateMnemonic(mnemonic);
+
+    print('Is the mnemonic valid? $isValid');
+    
     final walletProvider = Provider.of<WalletProvider>(context, listen: false);
 
     if (verificationText.trim() == widget.mnemonic.trim()) {
@@ -39,6 +50,7 @@ class _VerifyMnemonicPageState extends State<VerifyMnemonicPage> {
     }
 
     return Scaffold(
+      
       appBar: AppBar(
         title: const Text('Verify Mnemonic and Create'),
       ),

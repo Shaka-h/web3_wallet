@@ -19,6 +19,8 @@ class _WalletPageState extends State<WalletPage> {
   String walletAddress = '';
   String balance = '';
   String pvKey = '';
+  String selectedNetwork = 'Sepolia'; // Default network
+  final List<String> networks = ['Mainnet', 'Ropsten', 'Kovan', 'Rinkeby', 'Goerli', 'Sepolia'];
 
   @override
   void initState() {
@@ -34,12 +36,14 @@ class _WalletPageState extends State<WalletPage> {
       await walletProvider.loadPrivateKey();
       EthereumAddress address = await walletProvider.getPublicKey(privateKey);
       print(address.hex);
+      // 0x19bdb465bca107d9a81d23380db7adef1a995c5e
+      // 0x19bdb465bca107d9a81d23380db7adef1a995c5e
       setState(() {
         walletAddress = address.hex;
         pvKey = privateKey;
       });
       print(pvKey);
-      String response = await getBalances(address.hex, 'sepolia');
+      String response = await getBalances(address.hex, selectedNetwork.toLowerCase());
       dynamic data = json.decode(response);
       String newBalance = data['balance'] ?? '0';
 
@@ -55,11 +59,18 @@ class _WalletPageState extends State<WalletPage> {
     }
   }
 
+  void updateNetwork(String? newNetwork) {
+    setState(() {
+      selectedNetwork = newNetwork!;
+      loadWalletData(); // Reload wallet data for the new network
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wallet'),
+        title: const Text('Alphachain Wallet'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,6 +114,17 @@ class _WalletPageState extends State<WalletPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 16.0),
+                DropdownButton<String>(
+                  value: selectedNetwork,
+                  onChanged: updateNetwork,
+                  items: networks.map((String network) {
+                    return DropdownMenuItem<String>(
+                      value: network,
+                      child: Text(network),
+                    );
+                  }).toList(),
+                ),
               ],
             ),
           ),
@@ -112,13 +134,14 @@ class _WalletPageState extends State<WalletPage> {
               Column(
                 children: [
                   FloatingActionButton(
-                    heroTag: 'sendButton', // Unique tag for send button
+                    heroTag: 'sendButton',
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                SendTokensPage(privateKey: pvKey)),
+                          builder: (context) =>
+                              SendTokensPage(privateKey: pvKey),
+                        ),
                       );
                     },
                     child: const Icon(Icons.send),
@@ -130,11 +153,9 @@ class _WalletPageState extends State<WalletPage> {
               Column(
                 children: [
                   FloatingActionButton(
-                    heroTag: 'refreshButton', // Unique tag for send button
+                    heroTag: 'refreshButton',
                     onPressed: () {
-                      setState(() {
-                        // Update any necessary state variables or perform any actions to refresh the widget
-                      });
+                      loadWalletData(); // Refresh the wallet data
                     },
                     child: const Icon(Icons.replay_outlined),
                   ),
@@ -172,9 +193,9 @@ class _WalletPageState extends State<WalletPage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                      'Sepolia ETH',
-                                      style: TextStyle(
+                                    Text(
+                                      '$selectedNetwork ETH',
+                                      style: const TextStyle(
                                         fontSize: 24.0,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -195,8 +216,8 @@ class _WalletPageState extends State<WalletPage> {
                         // NFTs Tab
                         SingleChildScrollView(
                             child: NFTListPage(
-                                address: walletAddress, chain: 'sepolia')),
-                        // Activities Tab
+                                address: walletAddress, chain: selectedNetwork.toLowerCase())),
+                        // Options Tab
                         Center(
                           child: ListTile(
                             leading: const Icon(Icons.logout),
