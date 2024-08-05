@@ -26,6 +26,22 @@ def get_tokens():
 
     return result
 
+@app.route("/get_wallet_token_balances_price", methods=["GET"])
+def get_wallet_token_balances_price():
+    chain = request.args.get("chain")
+    address = request.args.get("address")
+
+    params = {
+        "chain": chain,
+        "address": address,
+    }
+    result = evm_api.wallets.get_wallet_token_balances_price(
+        api_key=api_key,
+        params=params,
+    )
+
+    return result
+
 
 @app.route("/get_user_nfts", methods=["GET"])
 def get_nfts():
@@ -51,6 +67,40 @@ def get_nfts():
     print(response)
     return response
 
+
+@app.route("/get_wallet_history", methods=["GET"])
+def get_wallet_history():
+    chain = request.args.get("chain")
+    order = request.args.get("order")
+    address = request.args.get("address")
+
+    params = {
+        "address": address,
+        "chain": chain,
+        "order": order,
+    }
+    result = evm_api.wallets.get_wallet_history(
+        api_key=api_key,
+        params=params,
+    )
+
+    return result
+
+
+@app.route("/get_wallet_active_chains", methods=["GET"])
+def get_wallet_active_chains():
+    address = request.args.get("address")
+
+    params = {
+        "address": address,
+    }
+
+    result = evm_api.wallets.get_wallet_active_chains(
+        api_key=api_key,
+        params=params,
+    )
+
+    return result
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)

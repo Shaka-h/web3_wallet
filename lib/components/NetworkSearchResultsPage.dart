@@ -9,21 +9,68 @@ import 'package:web3_wallet/components/add_network.dart';
 class NetworkSearchResultsPage extends StatefulWidget {
   final String searchTerm; // Include this parameter in the widget
 
-  const NetworkSearchResultsPage({Key? key, required this.searchTerm}) : super(key: key);
+  const NetworkSearchResultsPage({Key? key, required this.searchTerm})
+      : super(key: key);
 
   @override
-  _NetworkSearchResultsPageState createState() => _NetworkSearchResultsPageState();
+  _NetworkSearchResultsPageState createState() =>
+      _NetworkSearchResultsPageState();
 }
 
 class _NetworkSearchResultsPageState extends State<NetworkSearchResultsPage> {
   String walletAddress = '';
   String balance = '';
   String pvKey = '';
-  
-  String selectedNetwork = 'Ethereum'; // Default network
-  final List<String> networks = ['Ethereum', 'Bitcoin', 'Solana'];
+
+  List networkSearchs = [
+    {'name': "linea sepolia", 'id': "LINEA_SEPOLIA"},
+    {'name': "moonbase", 'id': "MOONBASE"},
+    {'name': "moonriver", 'id': "MOONRIVER"},
+    {'name': "linea", 'id': "LINEA"},
+    {'name': "polygon amoy", 'id': "POLYGON_AMOY"},
+    {'name': "holesky", 'id': "HOLESKY"},
+    {'name': "optimism", 'id': "OPTIMISM"},
+    {'name': "base sepolia", 'id': "BASE_SEPOLIA"},
+    {'name': "base", 'id': "BASE"},
+    {'name': "gnosis testnet", 'id': "GNOSIS_TESTNET"},
+    {'name': "chiliz testnet", 'id': "CHILIZ_TESTNET"},
+    {'name': "arbitrum", 'id': "ARBITRUM"},
+    {'name': "cronos", 'id': "CRONOS"},
+    {'name': "palm", 'id': "PALM"},
+    {'name': "avalanche", 'id': "AVALANCHE"},
+    {'name': "fantom", 'id': "FANTOM"},
+    {'name': "sepolia", 'id': "SEPOLIA"}
+  ];
+
+  final Map<String, String> networks = {
+    "linea sepolia": "LINEA_SEPOLIA",
+    "moonbase": "MOONBASE",
+    "moonriver": "MOONRIVER",
+    "linea": "LINEA",
+    "polygon amoy": "POLYGON_AMOY",
+    "holesky": "HOLESKY",
+    "optimism": "OPTIMISM",
+    "base sepolia": "BASE_SEPOLIA",
+    "base": "BASE",
+    "gnosis testnet": "GNOSIS_TESTNET",
+    "chiliz testnet": "CHILIZ_TESTNET",
+    "arbitrum": "ARBITRUM",
+    "cronos": "CRONOS",
+    "palm": "PALM",
+    "avalanche": "AVALANCHE",
+    "fantom": "FANTOM",
+    "sepolia": "SEPOLIA",
+    "polygon": "POLYGON",
+    "bsc": "BSC",
+    "bsc testnet": "BSC_TESTNET",
+    "gnosis": "GNOSIS",
+    "moonbeam": "MOONBEAM",
+  };
+
+  String selectedNetwork = 'linea sepolia'; // Default network
   TextEditingController _searchController = TextEditingController();
-  
+
+  Map<String, String> networkBalances = {}; // Store balances for each network
 
   @override
   void initState() {
@@ -43,17 +90,21 @@ class _NetworkSearchResultsPageState extends State<NetworkSearchResultsPage> {
         pvKey = privateKey;
       });
 
-      String response = await getBalances(address.hex, selectedNetwork.toLowerCase());
-      dynamic data = json.decode(response);
-      String newBalance = data['balance'] ?? '0';
+      for (String networkKey in networks.keys) {
+        String response = await getBalances(address.hex, networkKey);
+        dynamic data = json.decode(response);
+        String newBalance = data['balance'] ?? '0';
 
-      // Transform balance from wei to ether
-      EtherAmount latestBalance = EtherAmount.fromBigInt(EtherUnit.wei, BigInt.parse(newBalance));
-      String latestBalanceInEther = latestBalance.getValueInUnit(EtherUnit.ether).toString();
+        // Transform balance from wei to ether
+        EtherAmount latestBalance =
+            EtherAmount.fromBigInt(EtherUnit.wei, BigInt.parse(newBalance));
+        String latestBalanceInEther =
+            latestBalance.getValueInUnit(EtherUnit.ether).toString();
 
-      setState(() {
-        balance = latestBalanceInEther;
-      });
+        setState(() {
+          networkBalances[networkKey] = latestBalanceInEther;
+        });
+      }
     }
   }
 
@@ -107,35 +158,32 @@ class _NetworkSearchResultsPageState extends State<NetworkSearchResultsPage> {
                   ),
                   onChanged: (value) {
                     setState(() {
-                      walletAddress = value;
+                      // Perform search action here if needed
                     });
-                    // Perform search action here if needed
                   },
                 ),
                 const SizedBox(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            DropdownButton<String>(
-                              value: selectedNetwork,
-                              onChanged: updateNetwork,
-                              items: networks.map((String network) {
-                                return DropdownMenuItem<String>(
-                                  value: network,
-                                  child: Text(network),
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: networks.length,
+                    itemBuilder: (context, index) {
+                      String networkKey = networks.keys.elementAt(index);
+                      String networkLabel = networks[networkKey]!;
+                      String balance = networkBalances[networkKey] ?? '0';
+                      print(networkLabel);
+
+                      return ListTile(
+                        title: Text(networkLabel),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          setState(() {
+                            selectedNetwork = networkKey;
+                          });
+                          loadWalletData(); // Reload data for the selected network
+                        },
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
